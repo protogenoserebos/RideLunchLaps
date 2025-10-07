@@ -1,0 +1,15 @@
+{% extends "ll_buildbike/base.html" %}
+{% block home %}
+<div class="container" style="max-width:500px;margin:2rem auto">
+  <h1>Login</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-col">{{ form.username.label_tag }} {{ form.username }}</div>
+    <div class="form-col">{{ form.password.label_tag }} {{ form.password }}</div>
+    {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+    <button class="btn btn-primary" type="submit">Login</button>
+  </form>
+  <p style="margin-top:1rem">No account? <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next }}{% endif %}">Sign up</a></p>
+</div>
+{% endblock %}

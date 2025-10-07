@@ -1,0 +1,42 @@
+{% extends 'll_buildbike/base.html' %}
+
+
+{% load static %}
+{% block bikebuilds %}
+<h2>Step 1 — Bike details</h2>
+
+<form method="post" enctype="multipart/form-data" id="wizard-form">
+  {% csrf_token %}
+  {{ wizard.management_form }}
+  {{ form.as_p }}
+  
+  <div class="wizard-controls">
+    <button type="button" id="prev-btn" disabled>&larr;</button>
+    <button type="submit" id="next-btn">Next &rarr;</button>
+  </div>
+</form>
+
+<script>
+  // Optional: basic client-side validation before submit
+  document.getElementById('wizard-form').addEventListener('submit', function(e){
+    // use HTML5 validation; if invalid, browser will block submit
+  });
+</script>
+
+<script>
+const prev = "{{ wizard.steps.prev }}"; // template variables
+const next = "{{ wizard.steps.next }}";
+document.getElementById('prev-btn').onclick = () => {
+  if(!prev) return;
+  const f = document.querySelector('#wizard-form');
+  let hidden = document.createElement('input');
+  hidden.type = 'hidden'; hidden.name = 'wizard_goto_step'; hidden.value = prev;
+  f.appendChild(hidden); f.submit();
+};
+document.getElementById('next-btn').onclick = () => {
+  const f = document.querySelector('#wizard-form');
+  // allow the form to naturally validate & submit to progress
+  f.submit();
+};
+</script>
+{% endblock %}

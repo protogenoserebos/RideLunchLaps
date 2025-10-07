@@ -1,0 +1,34 @@
+{# ll_buildbike/templates/ll_buildbike/bike_wizard/bike_step.html #}
+{% extends "ll_buildbike/bike_wizard/step_base.html" %}
+
+{% block wizard_fields %}
+  <div class="grid-2">
+    <div class="form-row">
+      <label for="{{ form.bike_img.id_for_label }}">{{ form.bike_img.label }}</label>
+      {{ form.bike_img }}
+    </div>
+    <div class="form-row">
+      <label for="{{ form.gallery.id_for_label }}">{{ form.gallery.label }}</label>
+      {{ form.gallery }}
+    </div>
+  </div>
+
+  {# Render the rest of the fields except the two above #}
+  {% for field in form %}
+    {% if field.name != "bike_img" and field.name != "gallery" %}
+      <div class="form-row{% if field.errors %} has-error{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
+        {% for error in field.errors %}<div class="error-text">{{ error }}</div>{% endfor %}
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

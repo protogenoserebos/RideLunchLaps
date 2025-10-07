@@ -1,0 +1,133 @@
+{% extends "ll_buildbike/base.html" %}
+{% load static %}
+
+{% block home %}
+  <div class="container">
+
+    <!-- Welcome / intro callout -->
+    <section class="section" aria-labelledby="welcome">
+      <div id="welcome" class="welcome">
+        <h1 class="welcome__title">Welcome to Lunch Laps</h1>
+        <p class="welcome__lead">
+          Track your builds, browse community bikes, and find fresh deals on parts — all in one place.
+        </p>
+        <div class="welcome__actions">
+          <a class="navlink" href="{% url 'll_buildbike:bike_wizard' %}">Add Your Bike →</a>
+          <a class="navlink" href="{% url 'll_bikesearch:bikesearch' %}">Browse Builds →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Bikes -->
+    <section class="section" aria-labelledby="recent-bikes">
+      <div class="section__head">
+        <div>
+          <h2 id="recent-bikes" class="section__title">Recent Bikes</h2>
+          <p class="section__lead">Recently uploaded bike builds</p>
+        </div>
+        <a href="{% url 'll_bikesearch:bikesearch' %}" class="navlink">See all →</a>
+      </div>
+
+      <div class="cards">
+        {% for b in recent_bikes|slice:":8" %}
+<div class="card" style="position:relative;">
+  <a href="{% url 'bikedash:bikedash' %}#bike-{{ b.id }}">
+    {% if b.bike_img %}
+      <img class="card__media" src="{{ b.bike_img.url }}" alt="{{ b.bike_name|default:'Bike' }}">
+    {% else %}
+      <img class="card__media" src="{% static 'll_buildbike/img/placeholder-bike.png' %}" alt="">
+    {% endif %}
+    <div class="card__body">
+      <h3 class="card__title">{{ b.bike_name|default:"Untitled Bike" }}</h3>
+      <div class="card__meta">
+        {{ b.bike_make }} {{ b.bike_model }}{% if b.bike_year %} • {{ b.bike_year }}{% endif %}
+      </div>
+    </div>
+  </a>
+
+  <div style="position:absolute;top:8px;right:8px;display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.85);padding:4px 8px;border-radius:999px;border:1px solid #e5e7eb;">
+    <span>{{ b.like_count|default:0 }}</span>
+    {% if request.user.is_authenticated %}
+      <form method="post" action="{% url 'll_buildbike:toggle_like' b.id %}">
+        {% csrf_token %}
+        <button type="submit" class="linklike" title="Like" style="background:none;border:0;cursor:pointer;">❤️</button>
+      </form>
+    {% else %}
+      <a class="linklike" href="{% url 'accounts:login' %}?next={{ request.path }}">♡</a>
+    {% endif %}
+  </div>
+</div>
+
+          
+        {% empty %}
+          {% for i in "12345678" %}
+            <div class="card">
+              <div class="card__media" aria-hidden="true"></div>
+              <div class="card__body">
+                <div class="card__title" style="background:#e5e7eb;height:1em;width:70%;border-radius:6px;"></div>
+                <div class="card__meta" style="background:#eef2ff;height:.9em;width:50%;border-radius:6px;margin-top:6px;"></div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Recent Bike Deals -->
+    <section class="section" aria-labelledby="recent-deals">
+      <div class="section__head">
+        <div>
+          <h2 id="recent-deals" class="section__title">Recent Bike Deals</h2>
+          <p class="section__lead">Recent deals on bike parts</p>
+        </div>
+        <a href="{% url 'bikeaggr:bikesearchagg' %}" class="navlink">See all →</a>
+      </div>
+
+      <div class="cards">
+        {% for d in recent_deals|slice:":8" %}
+          <a class="card" href="{{ d.get_absolute_url|default:'#' }}">
+            {% if d.image_url %}
+              <img class="card__media" src="{{ d.image_url }}" alt="{{ d.title|default:'Deal' }}">
+            {% else %}
+              <img class="card__media" src="{% static 'll_buildbike/img/LL_Hero.png' %}" alt="">
+            {% endif %}
+            <div class="card__body">
+              <h3 class="card__title">{{ d.title|default:"Bike Part" }}</h3>
+              <div class="card__meta">
+                <span class="price">{% if d.price %}${{ d.price }}{% else %}&nbsp;{% endif %}</span>
+                {% if d.retailer %} • {{ d.retailer }}{% endif %}
+                {% if d.discount_pct %} <span class="pill">-{{ d.discount_pct }}%</span>{% endif %}
+              </div>
+            </div>
+          </a>
+        {% empty %}
+          {% for i in "12345678" %}
+            <div class="card">
+              <div class="card__media" aria-hidden="true"></div>
+              <div class="card__body">
+                <div class="card__title" style="background:#e5e7eb;height:1em;width:70%;border-radius:6px;"></div>
+                <div class="card__meta" style="background:#eef2ff;height:.9em;width:50%;border-radius:6px;margin-top:6px;"></div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <style>
+    /* Burgundy translucent intro block */
+    .welcome{
+      border:1px solid #e5e7eb;border-radius:12px;
+      background:
+        radial-gradient(1000px 260px at 50% -30%, rgba(128, 0, 64, .20), transparent),
+        #fff;
+      padding:18px 16px;
+    }
+    .welcome__title{margin:0 0 6px;font-size:1.35rem}
+    .welcome__lead{margin:0 0 10px;color:#374151}
+    .welcome__actions{display:flex;gap:10px;flex-wrap:wrap}
+    .welcome .navlink{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px}
+    .welcome .navlink:hover{background:#eef2ff}
+  </style>
+{% endblock home %}

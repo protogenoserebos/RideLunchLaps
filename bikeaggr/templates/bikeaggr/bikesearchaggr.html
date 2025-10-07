@@ -1,0 +1,18 @@
+{% extends 'll_buildbike/base.html' %}
+
+{% block bikesearchaggr %}
+
+<p>Hi There Test!!</p>
+{% for bike in trailbikes %}
+
+<p>{{ bike.title }}</p>
+<ul>
+<li>{{ bike.price }}</li>
+<li>{{ bike.location }}</li>
+<li>{{ bike.url }}</li>
+<li>{{ bike.scraped_at }}</li>
+<p style="margin-bottom:10px"></p>
+</ul>
+{% endfor %}
+
+{% endblock bikesearchaggr %}

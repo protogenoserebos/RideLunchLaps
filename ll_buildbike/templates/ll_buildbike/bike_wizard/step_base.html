@@ -1,0 +1,176 @@
+{# ll_buildbike/templates/ll_buildbike/bike_wizard/step_base.html #}
+{% extends "ll_buildbike/base.html" %}
+
+{% block bikebuilds %}
+
+<!--Header: Dynamic Create/Edit Bike Form title and Dynamic Step Breadcrumb Nav-->
+<div class="wizard-container">
+  <header class="wizard-header">
+  <h1>{{ page_title|default:"Create Bike" }}</h1>
+  <p class="wizard-step-label">
+    Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }} —
+    <strong>{{ current_title }}</strong>
+    </p>
+
+    <nav class="wizard-steps">
+      <ul>
+        {% for s in step_titles %}
+          {% if s.name == wizard.steps.current %}
+            <li class="current">{{ forloop.counter }}. {{ s.title }}</li>
+          {% elif forloop.counter < wizard.steps.step1 %}
+            <li>
+              <button form="wizard-form" name="wizard_goto_step" value="{{ s.name }}" class="linklike">
+                {{ forloop.counter }}. {{ s.title }}
+              </button>
+            </li>
+          {% else %}
+            <li class="disabled">{{ forloop.counter }}. {{ s.title }}</li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+  </header>
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  {# Review summary (only when provided by the view on the review step) #}
+  {% if all_data_seq %}
+    <section class="review-block">
+      <h2>Review</h2>
+      <div class="review-grid">
+        {% for chunk in all_data_seq %}
+          <div class="review-card">
+            <h3>{{ chunk.title }}</h3>
+            {% if chunk.data %}
+              <dl>
+                {% for k, v in chunk.data.items %}
+                  <dt>{{ k|title|cut:"_" }}</dt>
+                  <dd>{{ v }}</dd>
+                {% endfor %}
+              </dl>
+            {% else %}
+              <p><em>No entries.</em></p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Form Start -->
+
+
+  <form id="wizard-form" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ wizard.management_form }}
+
+  <div class="form-body">
+    {{ form.media }}
+    {% block step_intro %}{% endblock %}
+
+    {% block wizard_fields %}
+      {% for field in form %}
+        <div class="form-row{% if field.errors %} has-error{% endif %}">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<div class="error-text">{{ error }}</div>{% endfor %}
+        </div>
+      {% empty %}
+        <p><em>This step has no fields.</em></p>
+      {% endfor %}
+    {% endblock %}
+  </div>
+
+  <!-- Form Buttons -->
+
+    <div class="wizard-nav">
+      {% if wizard.steps.prev %}
+        <button type="submit" name="wizard_goto_step" value="{{ wizard.steps.prev }}" class="btn btn-secondary">
+          ← Back
+        </button>
+      {% endif %}
+
+      {# Primary submit on the right #}
+      {% if wizard.steps.current == "review" %}
+        <button type="submit" class="btn btn-primary">
+          {% if edit_mode %}{{ review_submit_label|default:"Save Changes" }}{% else %}Submit Bike{% endif %}
+        </button>
+      {% else %}
+        <button type="submit" class="btn btn-primary">
+          {% if edit_mode %}
+            {{ primary_submit_label|default:"Save & Continue →" }}
+          {% else %}
+            {% if next_title %}Add {{ next_title }} Details →{% else %}Next →{% endif %}
+          {% endif %}
+        </button>
+      {% endif %}
+
+      {# Finish from any step #}
+      <button type="submit" name="finish_now" value="1" class="btn btn-success">
+        {% if edit_mode %}{{ finish_now_label|default:"Save Now" }}{% else %}Submit Bike Now{% endif %}
+      </button>
+
+      {# Edit-mode only: Cancel back to dashboard (no submit) #}
+      {% if edit_mode %}
+        <a href="{% url 'bikedash:bikedash' %}" class="btn btn-outline">Cancel</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<script>
+/* Simple image previews for any input[type=file][data-preview] */
+(function () {
+  function renderPreviews(input) {
+    let preview = input.nextElementSibling;
+    if (!preview || !preview.classList || !preview.classList.contains('image-previews')) {
+      preview = document.createElement('div');
+      preview.className = 'image-previews';
+      input.insertAdjacentElement('afterend', preview);
+    }
+    preview.innerHTML = '';
+    const files = input.files || [];
+    Array.from(files).forEach(file => {
+      if (!file.type || !file.type.startsWith('image/')) return;
+      const url = URL.createObjectURL(file);
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = file.name;
+      img.onload = () => URL.revokeObjectURL(url);
+      img.className = 'thumb';
+      preview.appendChild(img);
+    });
+  }
+  document.addEventListener('change', function (e) {
+    const t = e.target;
+    if (t && t.matches('input[type="file"][data-preview]')) renderPreviews(t);
+  });
+  document.querySelectorAll('input[type="file"][data-preview]').forEach(renderPreviews);
+})();
+</script>
+
+<style>
+  .wizard-container { max-width: 880px; margin: 2rem auto; }
+  .wizard-header { margin-bottom: 1rem; }
+  .wizard-step-label { color: #666; }
+  .wizard-steps ul { display: flex; gap: .75rem; padding: 0; list-style: none; flex-wrap: wrap; }
+  .wizard-steps li { font-size: .95rem; }
+  .wizard-steps .current { font-weight: 700; }
+  .wizard-steps .disabled { color: #aaa; }
+  .linklike { background: none; border: none; padding: 0; color: #0b6bcb; text-decoration: underline; cursor: pointer; }
+  .form-row { margin: .75rem 0; display: grid; gap: .4rem; }
+  .form-row.has-error input, .form-row.has-error select, .form-row.has-error textarea { border-color: #c53030; }
+  .error-text { color: #c53030; font-size: .875rem; }
+  .help-text { color: #666; }
+  .wizard-nav { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; margin-top: 1rem; }
+  .btn { padding: .6rem 1rem; border-radius: .5rem; border: 1px solid #ccc; }
+  .btn-primary { background: #0b6bcb; color: #fff; border-color: #0b6bcb; }
+  .btn-secondary { background: #f4f6f8; }
+  .btn-success { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .image-previews { display: flex; gap: .5rem; margin-top: .5rem; flex-wrap: wrap; }
+  .image-previews .thumb { width: 72px; height: 72px; object-fit: cover; border-radius: .375rem; border: 1px solid #e5e7eb; }
+</style>
+{% endblock %}

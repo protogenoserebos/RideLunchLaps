@@ -1,0 +1,25 @@
+{% extends "ll_buildbike/base.html" %}
+{% block home %}
+<div class="container">
+  <div class="section__head">
+    <h2 class="section__title">My Bike Configurations</h2>
+    <a class="navlink" href="{% url 'bikeconfigs:create' %}">New config →</a>
+  </div>
+  <div class="cards">
+    {% for c in configs %}
+      <a class="card" href="{% url 'bikeconfigs:edit' c.id %}">
+        <div class="card__body">
+          <h3 class="card__title">{{ c.bike.bike_name|default:"Untitled Bike" }}</h3>
+          <div class="card__meta">
+            Fork: {{ c.fork_pressure_psi|default:"–" }} PSI /
+            Shock: {{ c.shock_pressure_psi|default:"–" }} PSI •
+            Tires: {{ c.tire_front_psi|default:"–" }}/{{ c.tire_rear_psi|default:"–" }}
+          </div>
+        </div>
+      </a>
+    {% empty %}
+      <p>You haven’t added any configs yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

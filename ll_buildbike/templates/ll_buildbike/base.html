@@ -1,0 +1,162 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lunch Laps</title>
+    <style>
+      :root{
+        --blurple:#5865F2;
+        --ink:#0f172a;
+        --muted:#64748b;
+        --card:#ffffff;
+        --bg:#f8fafc;
+        --ring: rgba(88,101,242,.35);
+        --radius:12px;
+      }
+      html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";}
+      a{color:inherit;text-decoration:none}
+      .container{max-width:1200px;margin:0 auto;padding:0 16px}
+
+      /* NAV 1 (hero) */
+      .navbar1{
+        display:grid;place-items:center;
+        padding:24px 16px;
+        background: radial-gradient(1200px 300px at 50% -50%, rgba(80,60,180,.25), transparent);
+      }
+      .hero-link{display:inline-block}
+      .hero-image{max-width:min(40vw,320px);height:auto}
+
+      /* NAV 2 */
+      .navbar2{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e5e7eb}
+      .nav-row{display:flex;align-items:center;justify-content:space-between;gap:12px;height:56px}
+      .nav-left,.nav-right{display:flex;align-items:center;gap:8px}
+      .navlink,.menubtn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:1px solid transparent}
+      .navlink:hover,.menubtn:hover{background:#f8fafc}
+      .menubtn{cursor:pointer}
+
+      /* Dropdowns (details/summary) */
+      .menu{position:relative}
+      .menu[open] .menubtn{background:#f8fafc;border-color:#e5e7eb}
+      .menu .menu-list{
+        position:absolute;top:calc(100% + 8px);left:0;min-width:220px;
+        background:#fff;border:1px solid #e5e7eb;border-radius:10px;
+        box-shadow:0 10px 30px rgba(0,0,0,.08);padding:6px;overflow:hidden
+      }
+      .menu .menu-item{display:block;padding:10px 12px;border-radius:8px;color:#0f172a}
+      .menu .menu-item:hover{background:#f3f4f6}
+
+      /* Toggle */
+      .toggle{display:flex;align-items:center;gap:10px;color:var(--muted)}
+      .switch{--w:44px;--h:24px;position:relative;width:var(--w);height:var(--h)}
+      .switch input{appearance:none;width:100%;height:100%;margin:0;cursor:pointer}
+      .switch .track{position:absolute;inset:0;background:#e5e7eb;border-radius:999px;transition:.2s}
+      .switch .thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:.2s}
+      .switch input:checked + .track{background:var(--blurple)}
+      .switch input:checked + .track + .thumb{left:22px}
+
+      /* Sections / cards (for home) */
+      .section{padding:20px 0 8px}
+      .section__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+      .section__title{font-size:1.25rem;font-weight:700}
+      .section__lead{color:var(--muted);font-size:.95rem}
+      .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+      @media (min-width:900px){.cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+      .card{background:var(--card);border:1px solid #e5e7eb;border-radius:var(--radius);overflow:hidden;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease}
+      .card:hover{transform:translateY(-2px);border-color:#d1d5db;box-shadow:0 8px 26px rgba(15,23,42,.06)}
+      .card__media{aspect-ratio:4/3;object-fit:cover;width:100%;background:#f3f4f6}
+      .card__body{padding:10px 12px}
+      .card__title{font-weight:600;line-height:1.2;margin:0 0 4px;font-size:.98rem}
+      .card__meta{font-size:.85rem;color:var(--muted)}
+      .price{color:#111827;font-weight:700}
+      .pill{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#3730a3}
+
+      /* Footer */
+      .site-footer{
+        margin-top:40px;color:#1f2937;
+        background: radial-gradient(1200px 300px at 50% 130%, rgba(80,60,180,.25), transparent);
+        border-top:1px solid #e5e7eb;
+      }
+      .footer-inner{display:flex;flex-direction:column;gap:8px;padding:18px 0}
+      .footer-note{font-size:.9rem;color:#374151}
+      .footer-links a{color:#111827;text-decoration:underline}
+      .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    </style>
+  </head>
+  <body>
+    <!-- Top hero bar (logo back to home) -->
+    <div class="navbar1">
+      <a class="hero-link" href="{% url 'home' %}" aria-label="Go to homepage">
+        <img src="{% static 'll_buildbike/img/LL_Hero.png' %}" alt="Lunch Laps" class="hero-image" />
+      </a>
+    </div>
+
+    <!-- Second nav bar -->
+    <nav class="navbar2">
+  <div class="container nav-row">
+    <div class="nav-left">
+      {% if request.user.is_authenticated %}
+        <details class="menu">
+          <summary class="menubtn">My Bikes ▾</summary>
+          <div class="menu-list">
+            <a class="menu-item" href="{% url 'bikedash:bikedash' %}">Bike Dashboard</a>
+            <a class="menu-item" href="{% url 'll_buildbike:bike_wizard' %}">Add a Bike</a>
+            <a class="menu-item" href="{% url 'bikeconfigs:list' %}">Bike Configurations</a>
+          </div>
+        </details>
+      {% else %}
+        <a class="navlink" href="{% url 'accounts:login' %}?next={% url 'bikedash:bikedash' %}">Login / Signup</a>
+      {% endif %}
+
+      <details class="menu">
+        <summary class="menubtn">Browse ▾</summary>
+        <div class="menu-list">
+          <a class="menu-item" href="{% url 'll_bikesearch:bikesearch' %}">Browse Bike Builds</a>
+          <a class="menu-item" href="{% url 'bikeaggr:bikesearchagg' %}">Browse Bike Deals</a>
+        </div>
+      </details>
+    </div>
+
+    <div class="nav-right">
+      {% if request.user.is_authenticated %}
+        <form method="post" action="{% url 'accounts:logout' %}" style="display:inline">
+  {% csrf_token %}
+  <button type="submit" class="navlink" style="background:none;border:0;padding:0;cursor:pointer">
+    Logout
+  </button>
+</form>
+      {% endif %}
+
+      <form method="get" action="" class="toggle">
+        <label class="switch" aria-label="Filter by My Bike">
+          <input type="checkbox" name="my" value="1" {% if request.GET.my %}checked{% endif %} />
+          <span class="track"></span><span class="thumb"></span>
+        </label>
+        <span>Filter by My Bike</span>
+      </form>
+    </div>
+  </div>
+</nav>
+
+
+    {% block bikebuilds %}{% endblock bikebuilds %}
+    {% block bikesearchaggr %}{% endblock bikesearchaggr %}
+    {% block dashboard %}{% endblock dashboard %}
+    {% block home %}{% endblock home %}
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-note">
+          <strong>Affiliate Notice:</strong> Some links on Lunch Laps may be Amazon affiliate links.
+          As an Amazon Associate, we may earn from qualifying purchases at no extra cost to you.
+        </p>
+        <p class="footer-links">
+          Questions or feedback? <a href="mailto:protogenoserebos@ridelunchlaps.com">Contact us</a>.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

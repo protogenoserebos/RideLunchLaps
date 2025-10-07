@@ -1,0 +1,65 @@
+{% extends "ll_buildbike/base.html" %}
+{% load static %}
+
+{% block home %}
+<div class="container" style="max-width:1000px;margin:2rem auto;">
+  <header style="display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div>
+      <h1 style="margin:0 0 6px;">{{ bike.bike_name|default:"Untitled Bike" }}</h1>
+      <div style="color:#64748b;">
+        by @{{ bike.owner.username|default:"anon" }}
+        {% if bike.date_created %} • {{ bike.date_created|date:"Y-m-d" }}{% endif %}
+      </div>
+    </div>
+    <a class="navlink" href="{% url 'bikedash:bikedash' %}">← Back</a>
+  </header>
+
+  {% if cover %}
+    <img src="{{ cover }}" alt="Cover photo" style="width:100%;max-height:480px;object-fit:cover;border-radius:12px;border:1px solid #e5e7eb;background:#f8fafc;">
+  {% endif %}
+
+  {% if gallery %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+      {% for url in gallery %}
+        <img src="{{ url }}" alt="Photo {{ forloop.counter }}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;background:#f8fafc;">
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if specs %}
+    <section style="margin-top:16px;">
+      <h2>Bike Specs</h2>
+      <dl style="margin:0;">
+        {% for row in specs %}
+          <div style="display:grid;grid-template-columns:200px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+            <dt style="font-weight:600;">{{ row.label }}</dt>
+            <dd style="margin:0;">{{ row.value }}</dd>
+          </div>
+        {% endfor %}
+      </dl>
+    </section>
+  {% endif %}
+
+  {% for sec in sections %}
+    <section style="margin-top:18px;">
+      <h2>{{ sec.title }}</h2>
+      {% for inst in sec.instances %}
+        <dl style="margin:0;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;background:#fff;">
+          {% for row in inst %}
+            <div style="display:grid;grid-template-columns:200px 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+              <dt style="font-weight:600;">{{ row.label }}</dt>
+              <dd style="margin:0;">
+                {% if row.is_url %}
+                  <a href="{{ row.value }}" target="_blank" rel="noopener">View</a>
+                {% else %}
+                  {{ row.value }}
+                {% endif %}
+              </dd>
+            </div>
+          {% endfor %}
+        </dl>
+      {% endfor %}
+    </section>
+  {% endfor %}
+</div>
+{% endblock home %}

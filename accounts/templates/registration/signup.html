@@ -1,0 +1,17 @@
+{% extends "ll_buildbike/base.html" %}
+{% block home %}
+<div class="container" style="max-width:500px;margin:2rem auto">
+  <h1>Create an account</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div class="form-col">
+        {{ field.label_tag }} {{ field }}
+        {% for e in field.errors %}<div class="error-text">{{ e }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Sign up</button>
+  </form>
+</div>
+{% endblock %}
