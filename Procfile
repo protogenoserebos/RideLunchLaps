@@ -1,1 +1,1 @@
-web: gunicorn LunchLapsProject.wsgi
+web: gunicorn LunchLapsProject.wsgi --bind 0.0.0.0:8080
